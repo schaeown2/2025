@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
-from textblob import TextBlob
 import matplotlib.pyplot as plt
 
 # 페이지 기본 설정
 st.set_page_config(page_title="하루치 학생 감정 분석", page_icon="📊", layout="wide")
 
 # 제목
-st.title("📊 하루치 학생 감정 분석")
-st.write("예시 학생들의 하루 일기를 바탕으로 감정을 분석합니다 😊😢😐")
+st.title("📊 하루치 학생 감정 분석 (규칙 기반 감정 사전)")
+st.write("예시 학생들의 하루 일기를 바탕으로, 간단한 단어 사전을 이용해 감정을 분석합니다 😊😢😐")
 
 # 🔹 예시 데이터
 data = {
@@ -21,22 +20,22 @@ data = {
         "숙제가 많아서 스트레스 받았어요"
     ]
 }
-
 df = pd.DataFrame(data)
 
-# 🔹 감정 분석
-results = []
-for text in df["일기"]:
-    blob = TextBlob(str(text))
-    polarity = blob.sentiment.polarity
-    if polarity > 0:
-        results.append("긍정 😊")
-    elif polarity < 0:
-        results.append("부정 😢")
-    else:
-        results.append("중립 😐")
+# 🔹 간단 감정 사전
+positive_words = ["좋았", "즐겁", "행복", "재미", "칭찬", "기뻤"]
+negative_words = ["속상", "스트레스", "싫", "화났", "슬펐", "짜증"]
 
-df["감정 결과"] = results
+def simple_sentiment(text):
+    if any(word in text for word in positive_words):
+        return "긍정 😊"
+    elif any(word in text for word in negative_words):
+        return "부정 😢"
+    else:
+        return "중립 😐"
+
+# 🔹 감정 분석
+df["감정 결과"] = df["일기"].apply(simple_sentiment)
 
 # 📑 학생별 결과
 st.subheader("📑 학생별 감정 분석 결과")
@@ -68,4 +67,5 @@ if negative_students:
     st.error(", ".join(negative_students) + " → 격려가 필요합니다 💡")
 else:
     st.write("오늘은 부정적인 감정을 가진 학생이 없습니다! 🎉")
+
 
